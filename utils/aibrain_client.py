@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import os
 from dotenv import load_dotenv
 import logging
@@ -24,8 +24,8 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise ValueError("GOOGLE_API_KEY not found in environment variables")
 
-# Configure Gemini
-genai.configure(api_key=GOOGLE_API_KEY)
+# Initialize Gemini client
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 class TravelAssistantError(Exception):
     """Custom exception for travel assistant errors."""
@@ -83,9 +83,6 @@ def generate_itinerary(
     try:
         validate_inputs(destination, days, preferences)
         
-        # Initialize Gemini model
-        model = genai.GenerativeModel('gemini-pro')
-        
         system_prompt = f"""You are an expert travel assistant that creates detailed and personalized travel itineraries.
         Focus on providing practical, well-structured information including:
         - Daily schedules with time estimates
@@ -108,7 +105,8 @@ def generate_itinerary(
         )
 
         # Generate response using Gemini
-        response = model.generate_content(
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
             contents=[
                 {"role": "system", "parts": [system_prompt]},
                 {"role": "user", "parts": [user_prompt]}
@@ -131,7 +129,7 @@ def generate_itinerary(
                 "days": days,
                 "preferences": preferences,
                 "language": language,
-                "model": "gemini-pro",
+                "model": "gemini-2.0-flash",
                 "prompt_tokens": len(system_prompt + user_prompt) // 4,  # Approximate token count
                 "generated_at": datetime.utcnow().isoformat(),
                 "version": "1.1.0"
