@@ -1,0 +1,6 @@
+pip install flask flask-limiter python-dotenv
+pip python show flask
+pip install -r requirements.txt
+pip install google-generativeai
+notepad .env GOOGLE_API_KEY=<API_Key>
+python .\app.py
